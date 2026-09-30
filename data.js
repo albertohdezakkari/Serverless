@@ -4,6 +4,7 @@ const lessons = [
   window.lesson02,
   window.lesson03,
   window.lesson04,
+  window.lesson04review,
   window.lesson05,
   window.lesson06,
   window.lesson07,
