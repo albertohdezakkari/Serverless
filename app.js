@@ -28,7 +28,10 @@ function render(preserveScroll=false){
   els.currentTitle.textContent=lesson.title;
   els.content.innerHTML=renderLesson(lesson);
   renderNav();updateProgress();updateBottomNav(lesson);bindInteractive(lesson);enhanceCodeBlocks();restoreMaximizedPanel();
-  if(preserveScroll){
+  if(state.maximizedPanel){
+    // En modo maximizado NO movemos el viewport de la página.
+    // El panel fullscreen es el único contexto de navegación hasta pulsar Volver.
+  }else if(preserveScroll){
     const y=state.viewportY ?? window.scrollY;
     requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:"instant"}));
   }else{
@@ -83,9 +86,10 @@ function restoreMaximizedPanel(){
   if(panel){
     panel.classList.add('panel-maximized');
     document.body.classList.add('panel-open');
-    panel.scrollTop=0;
+    panel.scrollTop=state.maximizedPanelScrollTop ?? 0;
   }else{
     state.maximizedPanel=null;
+    state.maximizedPanelScrollTop=0;
     saveState();
   }
 }
@@ -93,11 +97,13 @@ function togglePanel(key){
   const isFull=state.maximizedPanel===key;
   if(!isFull){
     state.panelScrollY=window.scrollY;
+    state.maximizedPanelScrollTop=0;
     state.maximizedPanel=key;
     saveState();
     render(true);
   }else{
     state.maximizedPanel=null;
+    state.maximizedPanelScrollTop=0;
     saveState();
     document.body.classList.remove('panel-open');
     render(true);
@@ -173,10 +179,10 @@ function renderSection(lesson,section,sectionIndex){
 }
 function bindInteractive(lesson){
   els.content.querySelectorAll("[data-panel-toggle]").forEach(button=>button.addEventListener("click",()=>togglePanel(button.dataset.panelToggle)));
-  els.content.querySelectorAll("[data-wizard-key]").forEach(button=>button.addEventListener("click",()=>{state.wizards||={};state.viewportY=window.scrollY;state.wizards[button.dataset.wizardKey]=Number(button.dataset.wizardIndex);saveState();render(true)}));
-  els.content.querySelectorAll("[data-wizard-next]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardNext;state.wizards||={};state.viewportY=window.scrollY;state.wizards[key]=(state.wizards[key]??0)+1;saveState();render(true)}));
-  els.content.querySelectorAll("[data-wizard-prev]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardPrev;state.wizards||={};state.viewportY=window.scrollY;state.wizards[key]=Math.max(0,(state.wizards[key]??0)-1);saveState();render(true)}));
-  els.content.querySelectorAll("[data-tab-key]").forEach(button=>button.addEventListener("click",()=>{state.tabs||={};state.viewportY=window.scrollY;state.tabs[button.dataset.tabKey]=Number(button.dataset.tabIndex);saveState();render(true)}));
+  els.content.querySelectorAll("[data-wizard-key]").forEach(button=>button.addEventListener("click",()=>{state.wizards||={};if(state.maximizedPanel){const p=document.querySelector('[data-panel-key="'+state.maximizedPanel+'"]');state.maximizedPanelScrollTop=p?.scrollTop??0;}else{state.viewportY=window.scrollY;}state.wizards[button.dataset.wizardKey]=Number(button.dataset.wizardIndex);saveState();render(true)}));
+  els.content.querySelectorAll("[data-wizard-next]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardNext;state.wizards||={};if(state.maximizedPanel){const p=document.querySelector('[data-panel-key="'+state.maximizedPanel+'"]');state.maximizedPanelScrollTop=p?.scrollTop??0;}else{state.viewportY=window.scrollY;}state.wizards[key]=(state.wizards[key]??0)+1;saveState();render(true)}));
+  els.content.querySelectorAll("[data-wizard-prev]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardPrev;state.wizards||={};if(state.maximizedPanel){const p=document.querySelector('[data-panel-key="'+state.maximizedPanel+'"]');state.maximizedPanelScrollTop=p?.scrollTop??0;}else{state.viewportY=window.scrollY;}state.wizards[key]=Math.max(0,(state.wizards[key]??0)-1);saveState();render(true)}));
+  els.content.querySelectorAll("[data-tab-key]").forEach(button=>button.addEventListener("click",()=>{state.tabs||={};if(state.maximizedPanel){const p=document.querySelector('[data-panel-key="'+state.maximizedPanel+'"]');state.maximizedPanelScrollTop=p?.scrollTop??0;}else{state.viewportY=window.scrollY;}state.tabs[button.dataset.tabKey]=Number(button.dataset.tabIndex);saveState();render(true)}));
   els.content.querySelectorAll("[data-check]").forEach(input=>input.addEventListener("change",()=>{state.checks||={};state.checks[lesson.id]||={};state.checks[lesson.id][input.dataset.check]=input.checked;saveState()}));
   els.content.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>{const sectionIndex=Number(button.dataset.quizSection);state.answers||={};state.answers[lesson.id]||={};state.answers[lesson.id][sectionIndex]=Number(button.dataset.answer);saveState();render()}));
 }
