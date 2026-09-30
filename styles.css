@@ -52,3 +52,8 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:15}
 @media (max-width:900px){.app-shell{display:block}.sidebar{transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:translateX(0)}.main-column{padding-left:0}.menu-btn{display:block}.bottom-nav{left:0}.grid{grid-template-columns:1fr}}
 @media (max-width:600px){.content{padding:24px 16px 74px}.topbar{padding:0 16px}.hero{padding:22px}.hero h2{font-size:28px}.card{padding:20px}.bottom-nav{padding:10px;gap:8px}.btn{padding:10px 12px;font-size:13px}}
+.steps-list{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:14px}
+.steps-list li{display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;padding:14px;border:1px solid var(--border);border-radius:13px;background:#F8FAFC}
+.step-number{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#DBEAFE;color:#1D4ED8;font-weight:900}
+.steps-list strong{display:block;margin:3px 0 5px}
+.steps-list p{margin:0!important}
