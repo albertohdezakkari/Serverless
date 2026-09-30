@@ -2,6 +2,8 @@ window.lesson03={
 id:"lambda",title:"Mi primera función Serverless con AWS Lambda",navTitle:"03 · Primera Lambda",
 hero:{eyebrow:"BLOQUE 03 · PRIMER BACKEND SERVERLESS",title:"Crea tu primera Lambda desde AWS Academy",description:"La primera vez trabajamos desde la consola y sin correr: concepto, runtime, Execution Role, código, Deploy, Test Event y CloudWatch.",chips:["Lambda","Node.js","Execution Role","event","handler","CloudWatch"]},
 sections:[
+{type:"flow",title:"Recorrido del bloque · antes de empezar",items:["A · ENTIENDE · Lambda → Function → Invocation → handler/event","B · CREA · Academy → función → runtime → Execution Role","C · PROGRAMA · index.mjs completo","D · PRUEBA · Deploy → Test Event → respuesta","E · OBSERVA · CloudWatch → AWS CLI → checkpoint"]},
+{type:"concept",title:"Objetivo del Bloque 03",text:"Crear tu primer backend serverless y poder explicar qué ejecuta Lambda, qué recibe, con qué permisos trabaja, cómo la invocas y dónde observas lo ocurrido."},
 {type:"concept",title:"Tenemos web, pero necesitamos backend",text:"S3 entrega el Ebook, pero no procesa el formulario. Necesitamos ejecutar código cuando se produzca una invocación."},
 {type:"concept",title:"¿Qué es AWS Lambda?",text:"Lambda ejecuta código en respuesta a invocaciones o eventos sin que administremos directamente el servidor. Se utiliza en APIs, procesamiento de archivos, automatizaciones, eventos y mensajería."},
 {type:"grid",cards:[
