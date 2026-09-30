@@ -105,3 +105,27 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
   .wizard-tab{min-width:150px;flex:0 0 auto}
   .wizard-stage{display:block}
 }
+
+/* Paneles de aprendizaje expandibles */
+.panel-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.panel-heading h3{margin-bottom:12px}
+.panel-actions{display:flex;gap:8px;flex:0 0 auto}
+.panel-action-btn,.copy-code-btn{border:1px solid var(--border);background:#fff;color:#334155;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.panel-action-btn:hover,.copy-code-btn:hover{background:#F8FAFC}
+.wizard-head-actions{display:flex;align-items:center;gap:10px}
+.wizard-head-actions>strong{background:#EFF6FF;color:#1D4ED8;border-radius:999px;padding:7px 11px;font-size:12px;white-space:nowrap}
+.panel-maximized{position:fixed!important;inset:12px!important;z-index:1000!important;margin:0!important;max-width:none!important;overflow:auto!important;background:var(--surface)!important;box-shadow:0 24px 80px rgba(15,23,42,.28)!important;border-radius:18px!important}
+.panel-maximized .panel-heading,.panel-maximized .wizard-head{position:sticky;top:0;z-index:4;background:rgba(255,255,255,.97);backdrop-filter:blur(10px)}
+.panel-maximized .tab-list,.panel-maximized .wizard-tabs{position:sticky;top:82px;z-index:3;background:#F8FAFC}
+body.panel-open{overflow:hidden}
+.code-shell{position:relative;margin:12px 0 0;border-radius:14px;overflow:hidden;background:var(--code);border:1px solid #1E293B}
+.code-shell pre{margin:0!important;border-radius:0!important;border:0!important}
+.code-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#111C2F;border-bottom:1px solid #26344D;color:#94A3B8;font-size:11px;font-weight:800}
+.copy-code-btn{background:#1E293B;border-color:#334155;color:#E2E8F0;padding:6px 9px}
+.copy-code-btn:hover{background:#334155}
+@media(max-width:600px){
+  .panel-maximized{inset:4px!important;border-radius:12px!important}
+  .panel-heading,.wizard-head{gap:10px}
+  .panel-action-btn{padding:7px 8px}
+  .wizard-head-actions{flex-direction:column;align-items:flex-end}
+}
