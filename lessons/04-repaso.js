@@ -18,31 +18,63 @@ sections:[
 {shortTitle:"S3",title:"Demuestra que recuerdas qué hicimos con la web",learn:"No vamos a crear otra web. Recuperamos el concepto.",text:"Localiza el bucket/web del Ebook y explica: qué contiene, qué significa website hosting y por qué pudo aparecer un 403.",expected:"Distingues objetos, configuración website y acceso público/policy.",success:"S3 recuperado.",help:[["Pista","Un bucket con index.html puede existir y aun así no ser legible públicamente."]],check:"Debes poder explicar S3 sin repetir comandos de memoria."}
 ]},
 
-{type:"concept",title:"3 · Mini-reto práctico · serverless-check",text:"Crea una NUEVA Lambda llamada serverless-check. Recibirá un nombre y devolverá un mensaje de confirmación. Después expondrás esa Lambda mediante una REST API llamada serverless-check-api con POST /check y stage dev."},
+{type:"concept",title:"3 · Mini laboratorio HTTP · cinco Lambdas",text:"Vas a crear cinco funciones pequeñas e independientes. No hay DynamoDB: simulamos operaciones para concentrarnos en HTTP, paso de parámetros, event, respuesta y logs. GET consulta, POST crea, PUT actualiza/reemplaza, PATCH realiza una actualización parcial y DELETE elimina."},
+{type:"warning",title:"Aclaración · UPDATE no es un método HTTP",text:"En lenguaje CRUD hablamos de UPDATE, pero HTTP no tiene un método llamado UPDATE. Practicaremos dos formas habituales: PUT para actualizar/reemplazar el recurso y PATCH para modificar sólo algunos campos."},
+{type:"flow",title:"Mapa del mini laboratorio",items:["GET /items/{id} → lambda-get-item","POST /items → lambda-post-item","PUT /items/{id} → lambda-put-item","PATCH /items/{id} → lambda-patch-item","DELETE /items/{id} → lambda-delete-item"]},
 
-{type:"codelearning",label:"ÚNICO CÓDIGO QUE TE DAMOS",title:"La lógica de serverless-check",filename:"index.mjs",text:"La actividad evalúa recuperación de AWS, no inventar JavaScript. Por eso sí proporcionamos la lógica, pero debes ser capaz de explicarla.",code:"// Lambda recibe un event y busca la propiedad nombre.\nexport const handler = async (event) => {\n  const nombre = event.nombre ?? 'alumno';\n\n  // Devolvemos una respuesta sencilla para reconocer la ejecución.\n  return {\n    statusCode: 200,\n    body: JSON.stringify({\n      message: 'Repaso superado por ' + nombre\n    })\n  };\n};",after:{title:"ANTES DE CREAR",text:"Predice qué devolverá si event = { nombre: 'Alberto' }. Después explica handler, event, ??, statusCode y JSON.stringify."}},
+{type:"codelearning",label:"LAMBDA 1 · GET",title:"lambda-get-item · recibe un parámetro de ruta",filename:"index.mjs",text:"Queremos ver cómo llega un id en pathParameters. No consultamos todavía una base de datos.",code:"export const handler = async (event) => {\n  // LOG 1 · Observamos TODO el evento recibido.\n  console.log('EVENT GET:', JSON.stringify(event));\n\n  // API Gateway colocará {id} dentro de pathParameters.\n  const id = event.pathParameters?.id ?? 'sin-id';\n  console.log('ID recibido:', id);\n\n  return {\n    statusCode: 200,\n    body: JSON.stringify({\n      operation: 'GET',\n      id,\n      message: 'Consultando el recurso ' + id\n    })\n  };\n};",after:{title:"QUÉ DEBES APRENDER",text:"Ruta /items/25 → pathParameters.id → 25. Después localiza ese mismo 25 en CloudWatch."}},
 
-{type:"tabs",label:"4 · CONSTRUYE CON AUTONOMÍA",title:"Requisitos · tú decides los pasos",tabs:[
-{title:"Lambda",intro:"Crea serverless-check con Node.js, arquitectura x86_64 y el Execution Role permitido por Learner Lab. Debes poder probarla directamente con un Test Event."},
-{title:"Test Event",intro:"Crea un evento que contenga nombre. La respuesta debe incluir Repaso superado por ..."},
-{title:"REST API",intro:"Crea serverless-check-api como REST API Regional."},
-{title:"Ruta + método",intro:"Crea /check y POST. Integra el método con serverless-check mediante Lambda proxy integration."},
-{title:"Permiso",intro:"Comprueba que API Gateway puede invocar Lambda. No confundas este permiso con el Execution Role."},
-{title:"Deploy",intro:"Publica la API en un stage dev y localiza la Invoke URL."}
+{type:"codelearning",label:"LAMBDA 2 · POST",title:"lambda-post-item · recibe datos en el body",filename:"index.mjs",text:"POST representa creación. Los datos llegan en event.body como JSON en texto y debemos convertirlos.",code:"export const handler = async (event) => {\n  console.log('EVENT POST:', JSON.stringify(event));\n\n  // Convertimos el texto JSON del body en objeto JavaScript.\n  const body = JSON.parse(event.body ?? '{}');\n  console.log('BODY recibido:', body);\n\n  return {\n    statusCode: 201,\n    body: JSON.stringify({\n      operation: 'POST',\n      received: body,\n      message: 'Recurso recibido para crear'\n    })\n  };\n};",after:{title:"QUÉ DEBES APRENDER",text:"POST no necesita id en la ruta para este ejemplo: enviamos datos mediante body. Observa la diferencia entre event.body (texto) y body (objeto)."}},
+
+{type:"codelearning",label:"LAMBDA 3 · PUT",title:"lambda-put-item · id en ruta + datos en body",filename:"index.mjs",text:"PUT combina dos entradas: qué recurso queremos actualizar (id) y cuáles serán sus datos (body).",code:"export const handler = async (event) => {\n  console.log('EVENT PUT:', JSON.stringify(event));\n\n  const id = event.pathParameters?.id ?? 'sin-id';\n  const body = JSON.parse(event.body ?? '{}');\n\n  console.log('ID a actualizar:', id);\n  console.log('Nuevos datos:', body);\n\n  return {\n    statusCode: 200,\n    body: JSON.stringify({\n      operation: 'PUT',\n      id,\n      newData: body,\n      message: 'Actualización completa simulada'\n    })\n  };\n};",after:{title:"QUÉ DEBES APRENDER",text:"PUT /items/25 + body JSON → pathParameters.id y event.body llegan juntos en la misma invocación."}},
+
+{type:"codelearning",label:"LAMBDA 4 · PATCH",title:"lambda-patch-item · UPDATE parcial",filename:"index.mjs",text:"PATCH representa nuestro UPDATE parcial: sólo enviamos el campo que queremos modificar.",code:"export const handler = async (event) => {\n  console.log('EVENT PATCH:', JSON.stringify(event));\n\n  const id = event.pathParameters?.id ?? 'sin-id';\n  const changes = JSON.parse(event.body ?? '{}');\n\n  console.log('ID a modificar:', id);\n  console.log('Cambios parciales:', changes);\n\n  return {\n    statusCode: 200,\n    body: JSON.stringify({\n      operation: 'PATCH',\n      id,\n      changes,\n      message: 'Actualización parcial simulada'\n    })\n  };\n};",after:{title:"PUT vs PATCH",text:"PUT practica una actualización/reemplazo completo; PATCH envía sólo cambios parciales. En ambos casos todavía simulamos: no existe persistencia."}},
+
+{type:"codelearning",label:"LAMBDA 5 · DELETE",title:"lambda-delete-item · identifica qué recurso eliminar",filename:"index.mjs",text:"DELETE necesita saber qué recurso se pretende eliminar. El id llega en la ruta.",code:"export const handler = async (event) => {\n  console.log('EVENT DELETE:', JSON.stringify(event));\n\n  const id = event.pathParameters?.id ?? 'sin-id';\n  console.log('ID a eliminar:', id);\n\n  return {\n    statusCode: 200,\n    body: JSON.stringify({\n      operation: 'DELETE',\n      id,\n      message: 'Eliminación simulada del recurso ' + id\n    })\n  };\n};",after:{title:"QUÉ DEBES APRENDER",text:"DELETE /items/25 → necesitamos identificar 25, pero normalmente no necesitamos enviar un objeto completo en body."}},
+
+{type:"tabs",label:"4 · TEST 1 · AWS LAMBDA",title:"Primero prueba cada Lambda directamente en la plataforma",tabs:[
+{title:"GET",intro:"Test Event simulado: reproduce la parte de event que después generará API Gateway.",code:"{\n  \"pathParameters\": { \"id\": \"25\" }\n}"},
+{title:"POST",intro:"event.body debe ser un STRING que contiene JSON.",code:"{\n  \"body\": \"{\\\"name\\\":\\\"Teclado\\\",\\\"price\\\":25}\"\n}"},
+{title:"PUT",intro:"Combina id + body.",code:"{\n  \"pathParameters\": { \"id\": \"25\" },\n  \"body\": \"{\\\"name\\\":\\\"Teclado Pro\\\",\\\"price\\\":35}\"\n}"},
+{title:"PATCH",intro:"Sólo enviamos el cambio parcial.",code:"{\n  \"pathParameters\": { \"id\": \"25\" },\n  \"body\": \"{\\\"price\\\":30}\"\n}"},
+{title:"DELETE",intro:"Sólo necesitamos identificar el recurso.",code:"{\n  \"pathParameters\": { \"id\": \"25\" }\n}"}
 ]},
 
-{type:"tabs",label:"5 · AYUDAS PROGRESIVAS",title:"Ábrelas sólo si te bloqueas",tabs:[
-{title:"Pista · Lambda",intro:"AWS Console → Lambda → Functions → Create function. Recupera del Bloque 03 qué significan Author from scratch, Runtime y Execution Role."},
-{title:"Pista · API",intro:"API Gateway → REST API → Resources. Piensa en el orden: recurso /check → método POST → integración Lambda."},
-{title:"Pista · Publicación",intro:"Crear Resources/Methods no publica una REST API. Recupera los conceptos Deployment y Stage."},
-{title:"Pista · Error 403/404",intro:"Comprueba método, ruta, stage, deployment y permiso de invocación antes de modificar Lambda."},
-{title:"Pista · Logs",intro:"Si API Gateway llega a Lambda pero el resultado no es el esperado, Monitor/CloudWatch te permite observar la invocación."}
+{type:"concept",title:"5 · API Gateway · una API, cinco integraciones",text:"Crea una REST API de repaso. Diseña /items y /items/{id}. POST vive en /items. GET, PUT, PATCH y DELETE viven en /items/{id}. Cada método se integra mediante Lambda proxy con SU Lambda correspondiente. Después despliega stage dev."},
+{type:"flow",title:"Mapa de rutas que debes conseguir",items:["POST /items → lambda-post-item","GET /items/{id} → lambda-get-item","PUT /items/{id} → lambda-put-item","PATCH /items/{id} → lambda-patch-item","DELETE /items/{id} → lambda-delete-item"]},
+
+{type:"tabs",label:"6 · TEST 2 · THUNDER CLIENT",title:"Prueba visualmente desde VS Code",tabs:[
+{title:"Antes de empezar",intro:"Abre VS Code → Thunder Client → New Request. Utiliza la Invoke URL real de tu stage dev. Observa Method, URL, Body, Status y Response en cada prueba."},
+{title:"GET",intro:"Método GET. URL: .../dev/items/25. Sin body. Debes recibir id = 25."},
+{title:"POST",intro:"Método POST. URL: .../dev/items. Body → JSON: { name: Teclado, price: 25 }. Debes recibir status 201 y received."},
+{title:"PUT",intro:"Método PUT. URL: .../dev/items/25. Body JSON con name y price. Comprueba id + newData."},
+{title:"PATCH",intro:"Método PATCH. URL: .../dev/items/25. Envía sólo { price: 30 }. Comprueba changes."},
+{title:"DELETE",intro:"Método DELETE. URL: .../dev/items/25. Sin body. Comprueba el id eliminado de forma simulada."}
 ]},
 
-{type:"wizard",label:"6 · DEMUESTRA",title:"No basta con decir «funciona»",steps:[
-{shortTitle:"Lambda",title:"Prueba directa",learn:"Primero aislamos Lambda.",text:"Ejecuta tu Test Event.",expected:"Respuesta 200 con Repaso superado por TU_NOMBRE.",success:"Lambda aislada ✓.",help:[["Falla","Código → Deploy → Test Event → resultado."]],check:"Enseña entrada y salida."},
-{shortTitle:"API",title:"Prueba HTTP",learn:"Ahora comprobamos la capa API Gateway.",text:"Utiliza curl desde Git Bash contra TU URL POST /dev/check. Construye tú el comando.",expected:"Recibes una respuesta HTTP procedente de serverless-check.",success:"API → Lambda ✓.",help:[["Pista curl","Necesitas método POST, Content-Type application/json y un body JSON."],["Respuesta usa alumno","Piensa en la forma del event cuando hay Lambda proxy: observa CloudWatch."]],check:"Guarda la evidencia del request/response."},
-{shortTitle:"Logs",title:"Encuentra tu invocación",learn:"La observabilidad forma parte del sistema.",text:"Localiza en CloudWatch la ejecución provocada por tu prueba HTTP.",expected:"Puedes relacionar hora/petición con una invocación concreta.",success:"Observabilidad ✓.",help:[["No hay logs","Comprueba que API Gateway llegó realmente a Lambda y que el role permite logging."]],check:"No cierres sin localizar una ejecución."}
+{type:"codelearning",label:"7 · TEST 3 · CURL",title:"Repite las cinco operaciones desde Git Bash",filename:"Git Bash",text:"Ahora haces las mismas peticiones sin interfaz gráfica. Lee los comentarios: método, ruta y body deben coincidir con Thunder Client.",code:"# Sustituye por la URL base REAL de tu stage dev.\nAPI_URL='https://API_ID.execute-api.TU_REGION.amazonaws.com/dev'\n\n# GET · id viaja en la RUTA.\ncurl -i -X GET \"$API_URL/items/25\"\n\n# POST · datos viajan en BODY.\ncurl -i -X POST \"$API_URL/items\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Teclado\",\"price\":25}'\n\n# PUT · id en RUTA + datos completos en BODY.\ncurl -i -X PUT \"$API_URL/items/25\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Teclado Pro\",\"price\":35}'\n\n# PATCH · id en RUTA + sólo el CAMBIO en BODY.\ncurl -i -X PATCH \"$API_URL/items/25\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"price\":30}'\n\n# DELETE · id viaja en la RUTA.\ncurl -i -X DELETE \"$API_URL/items/25\"",after:{title:"COMPARA",text:"Las cinco llamadas son las mismas que hiciste en Thunder Client. Cambia la herramienta, no cambia HTTP."}},
+
+{type:"tabs",label:"8 · LOGS · OBSERVA EL EVENT",title:"CloudWatch es parte obligatoria del repaso",tabs:[
+{title:"GET/DELETE",intro:"Localiza pathParameters.id = 25 en el evento/log. Explica por qué no necesitas body."},
+{title:"POST",intro:"Localiza event.body y explica por qué JSON.parse es necesario."},
+{title:"PUT",intro:"Localiza simultáneamente pathParameters.id y event.body."},
+{title:"PATCH",intro:"Comprueba que body sólo contiene el campo modificado."},
+{title:"Comparación",intro:"AWS Test Event, Thunder Client y curl provocan invocaciones de la misma Lambda. Compara qué parte del event estás simulando directamente y qué parte construye API Gateway."}
+]},
+
+{type:"checklist",title:"Checkpoint CRUD HTTP · antes de continuar",items:[
+"He creado cinco Lambdas independientes: GET, POST, PUT, PATCH y DELETE.",
+"Puedo explicar por qué UPDATE se practica mediante PUT/PATCH y no mediante un método UPDATE.",
+"He probado las cinco desde Test Event de Lambda.",
+"He creado /items y /items/{id} en API Gateway.",
+"Cada método invoca la Lambda correcta.",
+"He desplegado el stage dev.",
+"He probado las cinco operaciones con Thunder Client.",
+"He probado las cinco operaciones con curl desde Git Bash.",
+"Puedo distinguir parámetros de ruta y body.",
+"Puedo localizar los valores recibidos en CloudWatch Logs.",
+"Puedo explicar PUT vs PATCH.",
+"Entiendo que todavía NO hay persistencia: las operaciones son simuladas."
 ]},
 
 {type:"tabs",label:"7 · PREGUNTAS DE RECUPERACIÓN",title:"Explícalo sin tocar la consola",tabs:[
