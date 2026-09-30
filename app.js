@@ -61,9 +61,9 @@ function renderWizard(lesson,section,sectionIndex){
   return '<section class="card wizard-card">'+
     '<div class="wizard-head"><div><span class="label">'+(section.label||"GUÍA INTERACTIVA")+'</span><h3>'+section.title+'</h3></div><strong>'+(current+1)+' / '+section.steps.length+'</strong></div>'+
     '<div class="wizard-progress"><span style="width:'+pct+'%"></span></div>'+
+    '<div class="wizard-tabs" role="tablist">'+section.steps.map((s,i)=>'<button type="button" class="wizard-tab '+(i===current?"active ":"")+(i<current?"done":"")+'" data-wizard-key="'+key+'" data-wizard-index="'+i+'"><span class="wizard-tab-index">'+(i<current?"✓":i+1)+'</span><span class="wizard-tab-label">'+(s.shortTitle||s.title)+'</span></button>').join("")+'</div>'+
     '<div class="wizard-stage">'+
-      '<aside class="wizard-rail">'+section.steps.map((s,i)=>'<button type="button" class="wizard-dot '+(i===current?"active ":"")+(i<current?"done":"")+'" data-wizard-key="'+key+'" data-wizard-index="'+i+'" aria-label="Paso '+(i+1)+'">'+(i<current?"✓":i+1)+'</button>').join("")+'</aside>'+
-      '<div class="wizard-main"><p class="wizard-kicker">PASO '+(current+1)+'</p><h4>'+step.title+'</h4>'+
+      '<div class="wizard-main"><p class="wizard-kicker">PASO '+(current+1)+' DE '+section.steps.length+'</p><h4>'+step.title+'</h4>'+
         (step.learn?'<div class="learn-box"><strong>Antes de hacerlo · entiende</strong><p>'+step.learn+'</p></div>':'')+
         '<p>'+step.text+'</p>'+
         (step.code?'<pre><code>'+escapeHtml(step.code)+'</code></pre>':'')+
