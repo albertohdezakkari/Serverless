@@ -156,6 +156,7 @@ function renderSteps(section){
   return '<section class="card"><span class="label">AVANZA POR PASOS</span><h3>'+section.title+'</h3><ol class="steps-list">'+section.steps.map((step,i)=>'<li><span class="step-number">'+(i+1)+'</span><div><strong>'+step[0]+'</strong><p>'+step[1]+'</p></div></li>').join("")+'</ol></section>';
 }
 function renderSection(lesson,section,sectionIndex){
+  if(section.type==="consolemap") return '<section class="card console-map"><span class="label">'+(section.label||"MAPA DE PANTALLA")+'</span><h3>'+section.title+'</h3><p>'+section.text+'</p><div class="console-window"><div class="console-top">AWS Console <span>›</span> '+section.service+'</div><div class="console-body">'+section.areas.map((x,i)=>'<div class="console-area '+(x.active?"active":"")+'"><span>'+(i+1)+'</span><div><strong>'+x.title+'</strong><small>'+x.text+'</small></div></div>').join("")+'</div></div></section>';
   if(section.type==="wizard") return renderWizard(lesson,section,sectionIndex);
   if(section.type==="tabs") return renderTabs(lesson,section,sectionIndex);
   if(section.type==="steps") return renderSteps(section);
