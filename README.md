@@ -41,3 +41,6 @@ Preparada para publicarse directamente desde la rama `main` mediante GitHub Page
 
 ## Estado
 Primera base funcional del cuaderno. La progresión completa se incorporará bloque a bloque manteniendo conceptos antes de código, artefactos completos, checkpoints, autocorrección y entregas independientes.
+
+
+<!-- pages-redeploy: 2026-09-30 -->
