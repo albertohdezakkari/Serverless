@@ -34,10 +34,26 @@ function renderLesson(lesson){
   const hero='<section class="hero"><p class="eyebrow">'+lesson.hero.eyebrow+'</p><h2>'+lesson.hero.title+'</h2><p>'+lesson.hero.description+'</p><div class="chips">'+lesson.hero.chips.map(x=>'<span class="chip">'+x+'</span>').join("")+'</div></section>';
   return hero+lesson.sections.map((section,i)=>renderSection(lesson,section,i)).join("");
 }
+function renderTabs(lesson,section,sectionIndex){
+  const tabKey=lesson.id+"-"+sectionIndex;
+  const active=state.tabs?.[tabKey] ?? 0;
+  return '<section class="card tabs-card"><span class="label">'+(section.label||"APRENDE POR CAPAS")+'</span><h3>'+section.title+'</h3><div class="tab-list" role="tablist">'+
+    section.tabs.map((tab,i)=>'<button class="tab-btn '+(i===active?"active":"")+'" type="button" data-tab-key="'+tabKey+'" data-tab-index="'+i+'">'+tab.title+'</button>').join("")+
+    '</div><div class="tab-panel">'+section.tabs.map((tab,i)=>'<div class="tab-content '+(i===active?"active":"")+'">'+renderTabContent(tab)+'</div>').join("")+'</div></section>';
+}
+function renderTabContent(tab){
+  let html=tab.intro?'<p>'+tab.intro+'</p>':'';
+  if(tab.flow) html+='<div class="flow">'+tab.flow.map((x,i)=>'<div class="flow-box">'+x+'</div>'+(i<tab.flow.length-1?'<div class="flow-arrow">↓</div>':'')).join("")+'</div>';
+  if(tab.steps) html+='<ol class="steps-list">'+tab.steps.map((step,i)=>'<li><span class="step-number">'+(i+1)+'</span><div><strong>'+step[0]+'</strong><p>'+step[1]+'</p></div></li>').join("")+'</ol>';
+  if(tab.code) html+='<pre><code>'+escapeHtml(tab.code)+'</code></pre>';
+  if(tab.note) html+='<div class="inline-note">'+tab.note+'</div>';
+  return html;
+}
 function renderSteps(section){
   return '<section class="card"><span class="label">AVANZA POR PASOS</span><h3>'+section.title+'</h3><ol class="steps-list">'+section.steps.map((step,i)=>'<li><span class="step-number">'+(i+1)+'</span><div><strong>'+step[0]+'</strong><p>'+step[1]+'</p></div></li>').join("")+'</ol></section>';
 }
 function renderSection(lesson,section,sectionIndex){
+  if(section.type==="tabs") return renderTabs(lesson,section,sectionIndex);
   if(section.type==="steps") return renderSteps(section);
   if(section.type==="grid") return '<section class="grid">'+section.cards.map(card=>'<article class="card"><span class="label">'+card.label+'</span><h3>'+card.title+'</h3><p>'+card.text+'</p></article>').join("")+'</section>';
   if(section.type==="flow") return '<section class="card"><span class="label">REPRESENTACIÓN</span><h3>'+section.title+'</h3><div class="flow">'+section.items.map((item,i)=>'<div class="flow-box">'+item+'</div>'+(i<section.items.length-1?'<div class="flow-arrow">↓</div>':'')).join("")+'</div></section>';
@@ -58,6 +74,7 @@ function renderSection(lesson,section,sectionIndex){
   return '<section class="'+(classMap[section.type]||"card")+'"><span class="label">'+(labelMap[section.type]||"APRENDE")+'</span><h3>'+section.title+'</h3><p>'+section.text+'</p></section>';
 }
 function bindInteractive(lesson){
+  els.content.querySelectorAll("[data-tab-key]").forEach(button=>button.addEventListener("click",()=>{state.tabs||={};state.tabs[button.dataset.tabKey]=Number(button.dataset.tabIndex);saveState();render()}));
   els.content.querySelectorAll("[data-check]").forEach(input=>input.addEventListener("change",()=>{state.checks||={};state.checks[lesson.id]||={};state.checks[lesson.id][input.dataset.check]=input.checked;saveState()}));
   els.content.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>{const sectionIndex=Number(button.dataset.quizSection);state.answers||={};state.answers[lesson.id]||={};state.answers[lesson.id][sectionIndex]=Number(button.dataset.answer);saveState();render()}));
 }
