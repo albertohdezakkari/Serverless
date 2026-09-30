@@ -48,6 +48,10 @@ function panelActions(key){
   return '<div class="panel-actions"><button class="panel-action-btn" type="button" data-panel-toggle="'+key+'">'+(isFull?'↙ Volver':'⛶ Maximizar')+'</button></div>';
 }
 function enhanceCodeBlocks(){
+  els.content.querySelectorAll('.standalone-copy').forEach(btn=>btn.addEventListener('click',async()=>{
+    const code=[...btn.closest('.code-shell').querySelectorAll('.code-line')].map(x=>x.innerText).join("\n");
+    try{await navigator.clipboard.writeText(code);btn.textContent='✓ Copiado';setTimeout(()=>btn.textContent='Copiar código',1400);}catch{btn.textContent='Usa Ctrl+C';}
+  }));
   els.content.querySelectorAll('pre').forEach((pre,index)=>{
     if(pre.parentElement?.classList.contains('code-shell')) return;
     const shell=document.createElement('div');
@@ -156,6 +160,14 @@ function renderSteps(section){
   return '<section class="card"><span class="label">AVANZA POR PASOS</span><h3>'+section.title+'</h3><ol class="steps-list">'+section.steps.map((step,i)=>'<li><span class="step-number">'+(i+1)+'</span><div><strong>'+step[0]+'</strong><p>'+step[1]+'</p></div></li>').join("")+'</ol></section>';
 }
 function renderSection(lesson,section,sectionIndex){
+  if(section.type==="codelearning"){
+    const lines=section.code.split("\n").map(line=>{
+      const escaped=escapeHtml(line);
+      const trimmed=line.trim();
+      return '<span class="code-line '+(trimmed.startsWith("//")?"code-comment":"")+'">'+(escaped||" ")+'</span>';
+    }).join("");
+    return '<section class="card code-learning"><div class="panel-heading"><div><span class="label">'+(section.label||"LEE EL CÓDIGO")+'</span><h3>'+section.title+'</h3></div></div><p class="code-intro">'+section.text+'</p><div class="code-shell pedagogical-code"><div class="code-toolbar"><span>'+section.filename+'</span><button class="copy-code-btn standalone-copy" type="button">Copiar código</button></div><pre><code>'+lines+'</code></pre></div>'+(section.after?'<div class="expected-box"><strong>'+section.after.title+'</strong><p>'+section.after.text+'</p></div>':'')+'</section>';
+  }
   if(section.type==="consolemap") return '<section class="card console-map"><span class="label">'+(section.label||"MAPA DE PANTALLA")+'</span><h3>'+section.title+'</h3><p>'+section.text+'</p><div class="console-window"><div class="console-top">AWS Console <span>›</span> '+section.service+'</div><div class="console-body">'+section.areas.map((x,i)=>'<div class="console-area '+(x.active?"active":"")+'"><span>'+(i+1)+'</span><div><strong>'+x.title+'</strong><small>'+x.text+'</small></div></div>').join("")+'</div></div></section>';
   if(section.type==="wizard") return renderWizard(lesson,section,sectionIndex);
   if(section.type==="tabs") return renderTabs(lesson,section,sectionIndex);
