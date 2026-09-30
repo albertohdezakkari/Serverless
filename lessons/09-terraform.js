@@ -1,0 +1,36 @@
+window.lesson09={
+id:"terraform",title:"Reconstruye la arquitectura con Terraform",navTitle:"09 · Terraform",
+hero:{eyebrow:"BLOQUE 09 · INFRAESTRUCTURA COMO CÓDIGO",title:"De recursos manuales a infraestructura reproducible",description:"Ya comprendes los servicios. Ahora Terraform describe, planifica y reconstruye recursos conocidos sin convertir IaC en magia.",chips:["IaC","Terraform","AWS Provider","plan","apply","state","AWS Academy"]},
+sections:[
+{type:"flow",title:"Recorrido del bloque · antes de empezar",items:["A · ENTIENDE · consola → IaC","B · PREPARA · Academy + workspace","C · ESTRUCTURA · archivos .tf","D · REVISA · init → fmt → validate → plan","E · CONSTRUYE · apply","F · VERIFICA · outputs + AWS CLI","G · LIMPIA · destroy ✓"]},
+{type:"concept",title:"Objetivo del Bloque 09",text:"Traducir a Terraform recursos AWS que ya sabes explicar, leer un plan antes de modificar AWS y comprender que configuración, state y recursos reales forman parte del ciclo IaC."},
+{type:"tabs",label:"A · FUNDAMENTOS",title:"Terraform llega ahora por una razón",tabs:[
+{title:"Consola",intro:"Hasta ahora creábamos recursos mediante acciones manuales. Hemos aprendido qué significa cada uno antes de automatizarlo."},
+{title:"IaC",intro:"Terraform expresa el estado deseado en archivos versionables y reproducibles."},
+{title:"Declarativo",intro:"Declaramos recursos y referencias. Terraform calcula dependencias y acciones necesarias."},
+{title:"Plan",intro:"plan es una revisión previa. No ejecutamos apply si aparecen recursos o destrucciones que no entendemos."},
+{title:"State",intro:"El state relaciona nuestra configuración Terraform con los recursos reales gestionados. No es un archivo decorativo."}
+]},
+{type:"flow",title:"Traduce lo que ya conoces",items:["ContactMessages → aws_dynamodb_table","EbookRequests → aws_sns_topic","ebook-contact → aws_lambda_function","ebook-api → aws_api_gateway_rest_api","/contact + POST → resource/method/integration","dev → deployment/stage"]},
+
+{type:"wizard",label:"B · PREPARA",title:"Prepara Terraform dentro del workspace de clase",steps:[
+{shortTitle:"Academy",title:"Comprueba Learning Lab",learn:"Terraform AWS Provider necesitará credenciales válidas. Un token caducado puede hacer parecer incorrecto un .tf correcto.",text:"Comprueba identidad, región y Terraform.",code:"# Identidad temporal actual\naws sts get-caller-identity\n\n# Región del laboratorio\naws configure get region\n\n# Terraform instalado\nterraform --version",expected:"Los tres comandos responden.",success:"Entorno preparado.",help:[["ExpiredToken","Renueva ~/.aws/credentials."],["terraform no existe","Vuelve al Bloque 00."]],check:"No continúes con Academy roto."},
+{shortTitle:"Workspace",title:"Crea ebook-infra/terraform",learn:"Separamos infraestructura, aplicación y plantilla docente.",text:"Crea el proyecto en D:\\DEVOPS\\03-SERVERLESS.",code:"# Workspace común\ncd /d/DEVOPS/03-SERVERLESS\n\n# Proyecto IaC\nmkdir -p ebook-infra/terraform/lambda\ncd ebook-infra/terraform\npwd",expected:"pwd termina en /ebook-infra/terraform.",success:"Proyecto IaC independiente.",help:[["Ya existe","Revísalo antes de sobrescribir."],["Ruta incorrecta","Vuelve a /d/DEVOPS/03-SERVERLESS."]],check:"No trabajes dentro de lab/ebook-web."},
+{shortTitle:"Role",title:"Copia el Execution Role permitido",learn:"Learner Lab puede restringir IAM. No haremos que Terraform cree roles administrativos: reutilizamos el role que ya funciona con ebook-contact.",text:"Lambda → ebook-contact → Configuration → Permissions → copia Execution role ARN.",expected:"Tienes un ARN real de TU laboratorio.",success:"Será una variable Terraform.",help:[["No inventes LabRole","Copia el ARN real."],["No aparece","Revisa Configuration → Permissions."]],check:"ARN real, no uno del profesor."}
+]},
+
+{type:"codelearning",label:"C · ARCHIVO",title:"versions.tf · provider AWS",filename:"versions.tf",text:"Declaramos el provider y hacemos explícita la región.",code:"terraform {\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"~> 6.0\"\n    }\n  }\n}\n\nprovider \"aws\" {\n  // La región cambia según el Learning Lab.\n  region = var.aws_region\n}"},
+
+{type:"codelearning",label:"C · ARCHIVO",title:"variables.tf · datos del laboratorio",filename:"variables.tf",text:"Lo que cambia entre alumnos/sesiones entra como variable.",code:"variable \"aws_region\" {\n  description = \"Región del AWS Academy Learning Lab\"\n  type        = string\n}\n\nvariable \"lambda_role_arn\" {\n  description = \"Execution Role permitido por Learner Lab\"\n  type        = string\n}"},
+
+{type:"concept",title:"main.tf · no lo copies como una caja negra",text:"En main.tf aparecerán únicamente recursos que ya conoces: DynamoDB, SNS, Lambda y API Gateway. Cada referencia entre recursos sustituye valores que antes copiábamos manualmente, por ejemplo el ARN del topic o el nombre de la tabla."},
+
+{type:"wizard",label:"D · PRIMER CICLO",title:"init → fmt → validate → plan",steps:[
+{shortTitle:"init",title:"terraform init",learn:"Inicializa el directorio y descarga providers. No crea recursos AWS.",text:"Ejecuta:",code:"# Inicializa Terraform\nterraform init",expected:"Terraform has been successfully initialized.",success:"Provider preparado.",help:[["Error provider","Revisa versions.tf/conexión."]],check:"init ≠ deploy."},
+{shortTitle:"fmt",title:"terraform fmt",learn:"Formatea HCL de manera consistente.",text:"Ejecuta:",code:"# Formatea archivos .tf\nterraform fmt",expected:"Puede listar archivos modificados o no mostrar nada.",success:"Formato correcto.",help:[["No hay salida","Significa que no necesitaba cambios."]],check:"Calidad antes de desplegar."},
+{shortTitle:"validate",title:"terraform validate",learn:"Comprueba sintaxis y coherencia antes de hablar con AWS para crear recursos.",text:"Ejecuta:",code:"# Valida configuración\nterraform validate",expected:"Success! The configuration is valid.",success:"Configuración básica válida.",help:[["Error","Corrige archivo/línea antes de plan."]],check:"No plan con validate roto."},
+{shortTitle:"plan",title:"terraform plan · aquí pensamos",learn:"plan propone cambios. Es el punto de revisión: + crea, ~ modifica, - destruye.",text:"Usaremos región y role ARN reales.",code:"# Sustituye ambos valores por los de TU laboratorio\nterraform plan \\\n  -var=\"aws_region=TU_REGION\" \\\n  -var=\"lambda_role_arn=TU_ROLE_ARN\"",expected:"Aparece un plan que debes poder relacionar con la arquitectura conocida.",success:"Has revisado antes de modificar AWS.",help:[["AccessDenied","Academy/permisos."],["Role inválido","Revisa ARN."],["Recurso ya existe","Puede colisionar con recursos manuales; no borres a ciegas."]],check:"Si no entiendes una línea del plan, detente antes de apply."}
+]},
+{type:"concept",title:"Siguiente parte del bloque",text:"Una vez validado este ciclo añadiremos main.tf/outputs.tf completos, apply, verificación con AWS CLI y destroy. El objetivo no es correr: primero debes dominar el ciclo de revisión."},
+{type:"success",title:"Checkpoint parcial",text:"Entiendo por qué Terraform llega después de aprender AWS manualmente y sé preparar/revisar un proyecto hasta terraform plan sin modificar todavía la infraestructura."}
+]};
