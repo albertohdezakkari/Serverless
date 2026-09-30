@@ -18,7 +18,7 @@ function renderNav(){
   }).join("");
   els.nav.querySelectorAll("[data-index]").forEach(btn=>btn.addEventListener("click",()=>{currentIndex=Number(btn.dataset.index);render();closeMenu()}));
 }
-function render(anchorId=null){
+function render(preserveScroll=false){
   if (!lessons.length) {
     els.content.innerHTML = '<section class="card warning"><span class="label">ERROR DE CARGA</span><h3>Los bloques no se han cargado</h3><p>GitHub Pages está sirviendo una versión incompleta. Recarga cuando finalice el despliegue.</p></section>';
     els.nav.innerHTML = '<p class="muted">Esperando bloques…</p>';
@@ -28,14 +28,9 @@ function render(anchorId=null){
   els.currentTitle.textContent=lesson.title;
   els.content.innerHTML=renderLesson(lesson);
   renderNav();updateProgress();updateBottomNav(lesson);bindInteractive(lesson);
-  if(anchorId){
-    requestAnimationFrame(()=>{
-      const target=document.querySelector('[data-anchor="'+anchorId+'"]');
-      if(target){
-        const top=target.getBoundingClientRect().top+window.scrollY-82;
-        window.scrollTo({top,behavior:"instant"});
-      }
-    });
+  if(preserveScroll){
+    const y=state.viewportY ?? window.scrollY;
+    requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:"instant"}));
   }else{
     window.scrollTo({top:0,behavior:"smooth"});
   }
@@ -113,10 +108,10 @@ function renderSection(lesson,section,sectionIndex){
   return '<section class="'+(classMap[section.type]||"card")+'"><span class="label">'+(labelMap[section.type]||"APRENDE")+'</span><h3>'+section.title+'</h3><p>'+section.text+'</p></section>';
 }
 function bindInteractive(lesson){
-  els.content.querySelectorAll("[data-wizard-key]").forEach(button=>button.addEventListener("click",()=>{state.wizards||={};state.wizards[button.dataset.wizardKey]=Number(button.dataset.wizardIndex);saveState();render(button.dataset.wizardKey)}));
-  els.content.querySelectorAll("[data-wizard-next]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardNext;state.wizards||={};state.wizards[key]=(state.wizards[key]??0)+1;saveState();render(key)}));
-  els.content.querySelectorAll("[data-wizard-prev]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardPrev;state.wizards||={};state.wizards[key]=Math.max(0,(state.wizards[key]??0)-1);saveState();render(key)}));
-  els.content.querySelectorAll("[data-tab-key]").forEach(button=>button.addEventListener("click",()=>{state.tabs||={};state.tabs[button.dataset.tabKey]=Number(button.dataset.tabIndex);saveState();render(button.dataset.tabKey)}));
+  els.content.querySelectorAll("[data-wizard-key]").forEach(button=>button.addEventListener("click",()=>{state.wizards||={};state.viewportY=window.scrollY;state.wizards[button.dataset.wizardKey]=Number(button.dataset.wizardIndex);saveState();render(true)}));
+  els.content.querySelectorAll("[data-wizard-next]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardNext;state.wizards||={};state.viewportY=window.scrollY;state.wizards[key]=(state.wizards[key]??0)+1;saveState();render(true)}));
+  els.content.querySelectorAll("[data-wizard-prev]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardPrev;state.wizards||={};state.viewportY=window.scrollY;state.wizards[key]=Math.max(0,(state.wizards[key]??0)-1);saveState();render(true)}));
+  els.content.querySelectorAll("[data-tab-key]").forEach(button=>button.addEventListener("click",()=>{state.tabs||={};state.viewportY=window.scrollY;state.tabs[button.dataset.tabKey]=Number(button.dataset.tabIndex);saveState();render(true)}));
   els.content.querySelectorAll("[data-check]").forEach(input=>input.addEventListener("change",()=>{state.checks||={};state.checks[lesson.id]||={};state.checks[lesson.id][input.dataset.check]=input.checked;saveState()}));
   els.content.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>{const sectionIndex=Number(button.dataset.quizSection);state.answers||={};state.answers[lesson.id]||={};state.answers[lesson.id][sectionIndex]=Number(button.dataset.answer);saveState();render()}));
 }
