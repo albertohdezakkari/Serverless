@@ -27,7 +27,7 @@ function render(preserveScroll=false){
   const lesson=lessons[currentIndex];
   els.currentTitle.textContent=lesson.title;
   els.content.innerHTML=renderLesson(lesson);
-  renderNav();updateProgress();updateBottomNav(lesson);bindInteractive(lesson);enhanceCodeBlocks();
+  renderNav();updateProgress();updateBottomNav(lesson);bindInteractive(lesson);enhanceCodeBlocks();restoreMaximizedPanel();
   if(preserveScroll){
     const y=state.viewportY ?? window.scrollY;
     requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:"instant"}));
@@ -41,7 +41,8 @@ function renderLesson(lesson){
   return hero+lesson.sections.map((section,i)=>renderSection(lesson,section,i)).join("");
 }
 function panelActions(key){
-  return '<div class="panel-actions"><button class="panel-action-btn" type="button" data-panel-toggle="'+key+'">⛶ Maximizar</button></div>';
+  const isFull=state.maximizedPanel===key;
+  return '<div class="panel-actions"><button class="panel-action-btn" type="button" data-panel-toggle="'+key+'">'+(isFull?'↙ Volver':'⛶ Maximizar')+'</button></div>';
 }
 function enhanceCodeBlocks(){
   els.content.querySelectorAll('pre').forEach((pre,index)=>{
@@ -75,22 +76,32 @@ function enhanceCodeBlocks(){
     shell.append(bar,pre);
   });
 }
-function togglePanel(key){
-  const panel=document.querySelector('[data-panel-key="'+key+'"]');
-  if(!panel) return;
-  const isFull=panel.classList.contains('panel-maximized');
-  if(!isFull){
-    state.panelScrollY=window.scrollY;
+function restoreMaximizedPanel(){
+  document.body.classList.remove('panel-open');
+  if(!state.maximizedPanel) return;
+  const panel=document.querySelector('[data-panel-key="'+state.maximizedPanel+'"]');
+  if(panel){
     panel.classList.add('panel-maximized');
     document.body.classList.add('panel-open');
-    const btn=panel.querySelector('[data-panel-toggle]');
-    if(btn) btn.textContent='↙ Volver';
+    panel.scrollTop=0;
   }else{
-    panel.classList.remove('panel-maximized');
+    state.maximizedPanel=null;
+    saveState();
+  }
+}
+function togglePanel(key){
+  const isFull=state.maximizedPanel===key;
+  if(!isFull){
+    state.panelScrollY=window.scrollY;
+    state.maximizedPanel=key;
+    saveState();
+    render(true);
+  }else{
+    state.maximizedPanel=null;
+    saveState();
     document.body.classList.remove('panel-open');
-    const btn=panel.querySelector('[data-panel-toggle]');
-    if(btn) btn.textContent='⛶ Maximizar';
-    requestAnimationFrame(()=>window.scrollTo({top:state.panelScrollY??window.scrollY,behavior:'instant'}));
+    render(true);
+    requestAnimationFrame(()=>window.scrollTo({top:state.panelScrollY??window.scrollY,left:0,behavior:'instant'}));
   }
 }
 function renderTabs(lesson,section,sectionIndex){
