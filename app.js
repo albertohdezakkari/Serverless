@@ -29,8 +29,11 @@ function renderLesson(lesson){
   const hero='<section class="hero"><p class="eyebrow">'+lesson.hero.eyebrow+'</p><h2>'+lesson.hero.title+'</h2><p>'+lesson.hero.description+'</p><div class="chips">'+lesson.hero.chips.map(x=>'<span class="chip">'+x+'</span>').join("")+'</div></section>';
   return hero+lesson.sections.map((section,i)=>renderSection(lesson,section,i)).join("");
 }
+function renderSteps(section){
+  return '<section class="card"><span class="label">AVANZA POR PASOS</span><h3>'+section.title+'</h3><ol class="steps-list">'+section.steps.map((step,i)=>'<li><span class="step-number">'+(i+1)+'</span><div><strong>'+step[0]+'</strong><p>'+step[1]+'</p></div></li>').join("")+'</ol></section>';
+}
 function renderSection(lesson,section,sectionIndex){
-  if(section.type==="grid") return '<section class="grid">'+section.cards.map(card=>'<article class="card"><span class="label">'+card.label+'</span><h3>'+card.title+'</h3><p>'+card.text+'</p></article>').join("")+'</section>';
+  if(section.type==="steps") return renderSteps(section);\n  if(section.type==="grid") return '<section class="grid">'+section.cards.map(card=>'<article class="card"><span class="label">'+card.label+'</span><h3>'+card.title+'</h3><p>'+card.text+'</p></article>').join("")+'</section>';
   if(section.type==="flow") return '<section class="card"><span class="label">REPRESENTACIÓN</span><h3>'+section.title+'</h3><div class="flow">'+section.items.map((item,i)=>'<div class="flow-box">'+item+'</div>'+(i<section.items.length-1?'<div class="flow-arrow">↓</div>':'')).join("")+'</div></section>';
   if(section.type==="code") return '<section class="card dark"><span class="label">'+(section.label||"CÓDIGO")+'</span><h3>'+section.title+'</h3><pre><code>'+escapeHtml(section.code)+'</code></pre></section>';
   if(section.type==="table") return '<section class="card"><span class="label">REFERENCIA</span><h3>'+section.title+'</h3><div class="table-wrap"><table><thead><tr>'+section.headers.map(h=>'<th>'+h+'</th>').join("")+'</tr></thead><tbody>'+section.rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join("")+'</tr>').join("")+'</tbody></table></div></section>';
