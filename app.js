@@ -49,6 +49,10 @@ function renderTabContent(tab){
   if(tab.note) html+='<div class="inline-note">'+tab.note+'</div>';
   return html;
 }
+function renderHelp(help){
+  if(Array.isArray(help)) return '<ol class="diagnostic-list">'+help.map((x,i)=>'<li><strong>'+(i+1)+'. '+x[0]+'</strong><span>'+x[1]+'</span></li>').join("")+'</ol>';
+  return '<p>'+help+'</p>';
+}
 function renderWizard(lesson,section,sectionIndex){
   const key=lesson.id+"-wizard-"+sectionIndex;
   const current=Math.min(state.wizards?.[key] ?? 0,section.steps.length-1);
@@ -59,10 +63,14 @@ function renderWizard(lesson,section,sectionIndex){
     '<div class="wizard-progress"><span style="width:'+pct+'%"></span></div>'+
     '<div class="wizard-stage">'+
       '<aside class="wizard-rail">'+section.steps.map((s,i)=>'<button type="button" class="wizard-dot '+(i===current?"active ":"")+(i<current?"done":"")+'" data-wizard-key="'+key+'" data-wizard-index="'+i+'" aria-label="Paso '+(i+1)+'">'+(i<current?"✓":i+1)+'</button>').join("")+'</aside>'+
-      '<div class="wizard-main"><p class="wizard-kicker">PASO '+(current+1)+'</p><h4>'+step.title+'</h4><p>'+step.text+'</p>'+
+      '<div class="wizard-main"><p class="wizard-kicker">PASO '+(current+1)+'</p><h4>'+step.title+'</h4>'+
+        (step.learn?'<div class="learn-box"><strong>Antes de hacerlo · entiende</strong><p>'+step.learn+'</p></div>':'')+
+        '<p>'+step.text+'</p>'+
         (step.code?'<pre><code>'+escapeHtml(step.code)+'</code></pre>':'')+
         (step.expected?'<div class="expected-box"><strong>✓ Qué deberías ver</strong><p>'+step.expected+'</p></div>':'')+
-        (step.help?'<details class="help-box"><summary>No me sale · ver diagnóstico</summary><p>'+step.help+'</p></details>':'')+
+        (step.success?'<div class="success-path"><strong>SI TE SALE ✓</strong><p>'+step.success+'</p></div>':'')+
+        (step.help?'<details class="help-box"><summary>SI NO TE SALE · resuélvelo antes de continuar</summary>'+renderHelp(step.help)+'</details>':'')+
+        (step.check?'<div class="step-check"><strong>CIERRA ESTE PASO</strong><p>'+step.check+'</p></div>':'')+
       '</div>'+
     '</div>'+
     '<div class="wizard-actions"><button class="btn secondary" type="button" data-wizard-prev="'+key+'" '+(current===0?"disabled":"")+'>← Paso anterior</button><button class="btn primary" type="button" data-wizard-next="'+key+'" '+(current===section.steps.length-1?"disabled":"")+'>'+(current===section.steps.length-1?"Guía completada ✓":"Ya lo tengo · siguiente →")+'</button></div>'+
