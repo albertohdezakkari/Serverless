@@ -19,6 +19,11 @@ function renderNav(){
   els.nav.querySelectorAll("[data-index]").forEach(btn=>btn.addEventListener("click",()=>{currentIndex=Number(btn.dataset.index);render();closeMenu()}));
 }
 function render(){
+  if (!lessons.length) {
+    els.content.innerHTML = '<section class="card warning"><span class="label">ERROR DE CARGA</span><h3>Los bloques no se han cargado</h3><p>GitHub Pages está sirviendo una versión incompleta. Recarga cuando finalice el despliegue.</p></section>';
+    els.nav.innerHTML = '<p class="muted">Esperando bloques…</p>';
+    return;
+  }
   const lesson=lessons[currentIndex];
   els.currentTitle.textContent=lesson.title;
   els.content.innerHTML=renderLesson(lesson);
