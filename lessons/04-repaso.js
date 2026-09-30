@@ -1,24 +1,16 @@
 window.lesson04review={
 id:"repaso-api",title:"Actividad de repaso · Hasta API Gateway",navTitle:"REPASO · Hasta API Gateway",
-hero:{eyebrow:"ACTIVIDAD DE REPASO · NO EVALUABLE",title:"¿Puedes reconstruir lo aprendido sin seguir una receta?",description:"Antes de avanzar al frontend conectado, recupera S3, Lambda, API Gateway, AWS Academy, permisos y diagnóstico mediante una miniarquitectura nueva.",chips:["45–60 min","Individual","Repaso","S3","Lambda","API Gateway","CloudWatch"]},
+hero:{eyebrow:"ACTIVIDAD DE REPASO · NO EVALUABLE",title:"Laboratorio Lambda + API Gateway",description:"Repasa únicamente el backend HTTP aprendido hasta aquí: cinco Lambdas, paso de parámetros, logs, rutas/métodos de API Gateway y pruebas desde tres clientes.",chips:["60–90 min","Individual","Lambda","API Gateway","Thunder Client","curl","CloudWatch"]},
 sections:[
-{type:"flow",title:"Lo que estás repasando",items:["Entorno + AWS Academy","Web estática + S3","Lambda Node.js","Execution Role","API Gateway REST","POST + integración","Stage + URL","curl + CloudWatch"]},
-{type:"concept",title:"Objetivo de la actividad",text:"Construir una pequeña API de confirmación llamada serverless-check y demostrar que sabes explicar el recorrido Cliente → API Gateway → Lambda → respuesta. Además deberás relacionarla con la web S3 que ya construiste. No añadimos DynamoDB ni SNS: todavía no los has aprendido."},
+{type:"flow",title:"Recorrido de la actividad",items:["1 · Academy","2 · Cinco Lambdas Node.js","3 · Test Events","4 · CloudWatch","5 · REST API","6 · /items + /items/{id}","7 · GET/POST/PUT/PATCH/DELETE","8 · Thunder Client","9 · curl","10 · Compara event ✓"]},
+{type:"concept",title:"Objetivo de la actividad",text:"Construir una API CRUD SIMULADA sin base de datos. Cada método HTTP invocará una Lambda distinta. El objetivo es dominar event, pathParameters, body, JSON.parse, logs, integración API Gateway y pruebas HTTP. No utilizamos S3, frontend, DynamoDB ni SNS."},
 {type:"warning",title:"Modo repaso",text:"No es evaluación. Intenta resolver cada fase sin volver inmediatamente a los bloques anteriores. Si te bloqueas, utiliza las ayudas progresivas. El objetivo es descubrir qué necesitas recuperar antes de continuar."},
 
-{type:"tabs",label:"1 · ANTES DE TOCAR AWS",title:"Reconstruye el mapa mental",tabs:[
-{title:"Tu dibujo",intro:"En papel o en tu cuaderno dibuja: Usuario → Web estática → API Gateway → Lambda → respuesta. Añade dónde colocarías S3 y dónde observarías logs."},
-{title:"Explícalo",intro:"Debes poder decir en una frase qué responsabilidad tiene S3, Lambda, API Gateway y CloudWatch."},
-{title:"Permisos",intro:"Marca dos identidades diferentes: TÚ operando con credenciales temporales de Academy y LAMBDA ejecutándose con su Execution Role."},
-{title:"Checkpoint",intro:"No empieces a crear recursos hasta poder explicar el dibujo sin utilizar nombres de botones de la consola."}
+{type:"wizard",label:"1 · PUNTO DE PARTIDA",title:"Sólo necesitamos AWS Academy + backend",steps:[
+{shortTitle:"Academy",title:"Comprueba Learning Lab",learn:"Todo el laboratorio ocurre en la cuenta temporal de AWS Academy.",text:"Comprueba identidad y región antes de crear las cinco Lambdas.",code:"# Identidad temporal de AWS Academy\naws sts get-caller-identity\n\n# Región donde crearás Lambda y API Gateway\naws configure get region",expected:"STS responde y conoces la región.",success:"Backend preparado.",help:[["ExpiredToken","Renueva las credenciales temporales del Learning Lab."],["Región vacía","Comprueba la región indicada por Academy/consola."]],check:"Lambda y API Gateway deben estar en la misma cuenta/región."},
+{shortTitle:"Role",title:"Recuerda el Execution Role",learn:"Cada Lambda necesita una identidad de ejecución. En Learner Lab reutiliza el role permitido por Academy.",text:"Al crear las Lambdas identifica/selecciona el Execution Role disponible en el laboratorio.",expected:"Puedes explicar que este role pertenece a Lambda, no a tu terminal.",success:"IAM recuperado.",help:[["No aparece LabRole","No inventes nombres: utiliza el role que Learner Lab permita."],["AccessDenied","No intentes crear AdministratorAccess."]],check:"Credenciales Academy ≠ Execution Role Lambda."}
 ]},
-
-{type:"wizard",label:"2 · RECUPERA TU LABORATORIO",title:"Demuestra que el punto de partida sigue funcionando",steps:[
-{shortTitle:"Academy",title:"Comprueba identidad y región",learn:"Antes de diagnosticar AWS debemos saber que Learning Lab sigue activo.",text:"Sin mirar el Bloque 00, utiliza los comandos que recuerdes para demostrar identidad y región.",expected:"Puedes enseñar el Account/Arn de tu sesión y decir en qué región estás.",success:"Entorno válido.",help:[["Pista 1","Necesitas AWS CLI."],["Pista 2","Recuerda los comandos sts get-caller-identity y configure get region."]],check:"Si Academy ha caducado, resuélvelo antes de continuar."},
-{shortTitle:"S3",title:"Demuestra que recuerdas qué hicimos con la web",learn:"No vamos a crear otra web. Recuperamos el concepto.",text:"Localiza el bucket/web del Ebook y explica: qué contiene, qué significa website hosting y por qué pudo aparecer un 403.",expected:"Distingues objetos, configuración website y acceso público/policy.",success:"S3 recuperado.",help:[["Pista","Un bucket con index.html puede existir y aun así no ser legible públicamente."]],check:"Debes poder explicar S3 sin repetir comandos de memoria."}
-]},
-
-{type:"concept",title:"3 · Mini laboratorio HTTP · cinco Lambdas",text:"Vas a crear cinco funciones pequeñas e independientes. No hay DynamoDB: simulamos operaciones para concentrarnos en HTTP, paso de parámetros, event, respuesta y logs. GET consulta, POST crea, PUT actualiza/reemplaza, PATCH realiza una actualización parcial y DELETE elimina."},
+{type:"concept",title:"2 · Cinco Lambdas · mini laboratorio HTTP",text:"Vas a crear cinco funciones pequeñas e independientes. No hay DynamoDB: simulamos operaciones para concentrarnos en HTTP, paso de parámetros, event, respuesta y logs. GET consulta, POST crea, PUT actualiza/reemplaza, PATCH realiza una actualización parcial y DELETE elimina."},
 {type:"warning",title:"Aclaración · UPDATE no es un método HTTP",text:"En lenguaje CRUD hablamos de UPDATE, pero HTTP no tiene un método llamado UPDATE. Practicaremos dos formas habituales: PUT para actualizar/reemplazar el recurso y PATCH para modificar sólo algunos campos."},
 {type:"flow",title:"Mapa del mini laboratorio",items:["GET /items/{id} → lambda-get-item","POST /items → lambda-post-item","PUT /items/{id} → lambda-put-item","PATCH /items/{id} → lambda-patch-item","DELETE /items/{id} → lambda-delete-item"]},
 
@@ -32,7 +24,7 @@ sections:[
 
 {type:"codelearning",label:"LAMBDA 5 · DELETE",title:"lambda-delete-item · identifica qué recurso eliminar",filename:"index.mjs",text:"DELETE necesita saber qué recurso se pretende eliminar. El id llega en la ruta.",code:"export const handler = async (event) => {\n  console.log('EVENT DELETE:', JSON.stringify(event));\n\n  const id = event.pathParameters?.id ?? 'sin-id';\n  console.log('ID a eliminar:', id);\n\n  return {\n    statusCode: 200,\n    body: JSON.stringify({\n      operation: 'DELETE',\n      id,\n      message: 'Eliminación simulada del recurso ' + id\n    })\n  };\n};",after:{title:"QUÉ DEBES APRENDER",text:"DELETE /items/25 → necesitamos identificar 25, pero normalmente no necesitamos enviar un objeto completo en body."}},
 
-{type:"tabs",label:"4 · TEST 1 · AWS LAMBDA",title:"Primero prueba cada Lambda directamente en la plataforma",tabs:[
+{type:"tabs",label:"3 · TEST 1 · AWS LAMBDA",title:"Primero prueba cada Lambda directamente en la plataforma",tabs:[
 {title:"GET",intro:"Test Event simulado: reproduce la parte de event que después generará API Gateway.",code:"{\n  \"pathParameters\": { \"id\": \"25\" }\n}"},
 {title:"POST",intro:"event.body debe ser un STRING que contiene JSON.",code:"{\n  \"body\": \"{\\\"name\\\":\\\"Teclado\\\",\\\"price\\\":25}\"\n}"},
 {title:"PUT",intro:"Combina id + body.",code:"{\n  \"pathParameters\": { \"id\": \"25\" },\n  \"body\": \"{\\\"name\\\":\\\"Teclado Pro\\\",\\\"price\\\":35}\"\n}"},
@@ -40,10 +32,10 @@ sections:[
 {title:"DELETE",intro:"Sólo necesitamos identificar el recurso.",code:"{\n  \"pathParameters\": { \"id\": \"25\" }\n}"}
 ]},
 
-{type:"concept",title:"5 · API Gateway · una API, cinco integraciones",text:"Crea una REST API de repaso. Diseña /items y /items/{id}. POST vive en /items. GET, PUT, PATCH y DELETE viven en /items/{id}. Cada método se integra mediante Lambda proxy con SU Lambda correspondiente. Después despliega stage dev."},
+{type:"concept",title:"4 · API Gateway · una API, cinco integraciones",text:"Crea una REST API de repaso. Diseña /items y /items/{id}. POST vive en /items. GET, PUT, PATCH y DELETE viven en /items/{id}. Cada método se integra mediante Lambda proxy con SU Lambda correspondiente. Después despliega stage dev."},
 {type:"flow",title:"Mapa de rutas que debes conseguir",items:["POST /items → lambda-post-item","GET /items/{id} → lambda-get-item","PUT /items/{id} → lambda-put-item","PATCH /items/{id} → lambda-patch-item","DELETE /items/{id} → lambda-delete-item"]},
 
-{type:"tabs",label:"6 · TEST 2 · THUNDER CLIENT",title:"Prueba visualmente desde VS Code",tabs:[
+{type:"tabs",label:"5 · TEST 2 · THUNDER CLIENT",title:"Prueba visualmente desde VS Code",tabs:[
 {title:"Antes de empezar",intro:"Abre VS Code → Thunder Client → New Request. Utiliza la Invoke URL real de tu stage dev. Observa Method, URL, Body, Status y Response en cada prueba."},
 {title:"GET",intro:"Método GET. URL: .../dev/items/25. Sin body. Debes recibir id = 25."},
 {title:"POST",intro:"Método POST. URL: .../dev/items. Body → JSON: { name: Teclado, price: 25 }. Debes recibir status 201 y received."},
@@ -52,9 +44,9 @@ sections:[
 {title:"DELETE",intro:"Método DELETE. URL: .../dev/items/25. Sin body. Comprueba el id eliminado de forma simulada."}
 ]},
 
-{type:"codelearning",label:"7 · TEST 3 · CURL",title:"Repite las cinco operaciones desde Git Bash",filename:"Git Bash",text:"Ahora haces las mismas peticiones sin interfaz gráfica. Lee los comentarios: método, ruta y body deben coincidir con Thunder Client.",code:"# Sustituye por la URL base REAL de tu stage dev.\nAPI_URL='https://API_ID.execute-api.TU_REGION.amazonaws.com/dev'\n\n# GET · id viaja en la RUTA.\ncurl -i -X GET \"$API_URL/items/25\"\n\n# POST · datos viajan en BODY.\ncurl -i -X POST \"$API_URL/items\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Teclado\",\"price\":25}'\n\n# PUT · id en RUTA + datos completos en BODY.\ncurl -i -X PUT \"$API_URL/items/25\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Teclado Pro\",\"price\":35}'\n\n# PATCH · id en RUTA + sólo el CAMBIO en BODY.\ncurl -i -X PATCH \"$API_URL/items/25\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"price\":30}'\n\n# DELETE · id viaja en la RUTA.\ncurl -i -X DELETE \"$API_URL/items/25\"",after:{title:"COMPARA",text:"Las cinco llamadas son las mismas que hiciste en Thunder Client. Cambia la herramienta, no cambia HTTP."}},
+{type:"codelearning",label:"6 · TEST 3 · CURL",title:"Repite las cinco operaciones desde Git Bash",filename:"Git Bash",text:"Ahora haces las mismas peticiones sin interfaz gráfica. Lee los comentarios: método, ruta y body deben coincidir con Thunder Client.",code:"# Sustituye por la URL base REAL de tu stage dev.\nAPI_URL='https://API_ID.execute-api.TU_REGION.amazonaws.com/dev'\n\n# GET · id viaja en la RUTA.\ncurl -i -X GET \"$API_URL/items/25\"\n\n# POST · datos viajan en BODY.\ncurl -i -X POST \"$API_URL/items\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Teclado\",\"price\":25}'\n\n# PUT · id en RUTA + datos completos en BODY.\ncurl -i -X PUT \"$API_URL/items/25\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Teclado Pro\",\"price\":35}'\n\n# PATCH · id en RUTA + sólo el CAMBIO en BODY.\ncurl -i -X PATCH \"$API_URL/items/25\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"price\":30}'\n\n# DELETE · id viaja en la RUTA.\ncurl -i -X DELETE \"$API_URL/items/25\"",after:{title:"COMPARA",text:"Las cinco llamadas son las mismas que hiciste en Thunder Client. Cambia la herramienta, no cambia HTTP."}},
 
-{type:"tabs",label:"8 · LOGS · OBSERVA EL EVENT",title:"CloudWatch es parte obligatoria del repaso",tabs:[
+{type:"tabs",label:"7 · LOGS · OBSERVA EL EVENT",title:"CloudWatch es parte obligatoria del repaso",tabs:[
 {title:"GET/DELETE",intro:"Localiza pathParameters.id = 25 en el evento/log. Explica por qué no necesitas body."},
 {title:"POST",intro:"Localiza event.body y explica por qué JSON.parse es necesario."},
 {title:"PUT",intro:"Localiza simultáneamente pathParameters.id y event.body."},
@@ -98,5 +90,5 @@ sections:[
 "He probado la API desde Git Bash.",
 "He utilizado CloudWatch como evidencia/diagnóstico."
 ]},
-{type:"success",title:"Repaso completado",text:"Si puedes demostrar estos checkpoints, mañana puedes cerrar aquí la sesión. El Bloque 05 empezará otro día introduciendo un problema nuevo: conectar el navegador real con la API y comprender event.body/CORS."}
+{type:"success",title:"Repaso Lambda + API Gateway completado",text:"La actividad termina aquí. Has trabajado únicamente backend HTTP: Lambda, event, parámetros, body, logs, API Gateway, Thunder Client y curl. S3/frontend/DynamoDB/SNS quedan fuera de este repaso."}
 ]};
