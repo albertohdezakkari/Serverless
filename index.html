@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cuaderno de aprendizaje AWS Serverless con AWS Academy, Node.js, AWS CLI y Terraform.">
+  <title>Cuaderno AWS Serverless</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-badge">AWS</div>
+        <div>
+          <p class="eyebrow">CUADERNO DE APRENDIZAJE</p>
+          <h1>Serverless AWS</h1>
+          <p class="muted">AWS Academy · Node.js · Terraform</p>
+        </div>
+      </div>
+      <section class="progress-card" aria-label="Progreso del cuaderno">
+        <div class="progress-meta">
+          <span>Progreso</span>
+          <strong id="progressPercent">0%</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </section>
+      <nav class="lesson-nav" id="lessonNav" aria-label="Bloques del cuaderno"></nav>
+      <button class="reset-btn" id="resetProgress" type="button">Reiniciar progreso</button>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="Abrir menú">☰</button>
+        <div>
+          <p class="eyebrow">CUADERNO DE APRENDIZAJE</p>
+          <strong id="currentTitle">Inicio</strong>
+        </div>
+        <span class="saved-state" id="savedState">Guardado ✓</span>
+      </header>
+
+      <main id="content" class="content" tabindex="-1"></main>
+
+      <footer class="bottom-nav">
+        <button id="prevBtn" class="btn secondary" type="button">← Anterior</button>
+        <button id="completeBtn" class="btn success" type="button">✓ Completado</button>
+        <button id="nextBtn" class="btn primary" type="button">Siguiente →</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
