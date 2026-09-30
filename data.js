@@ -8,5 +8,6 @@ const lessons = [
   window.lesson06,
   window.lesson07,
   window.lesson08,
-  window.lesson09
+  window.lesson09,
+  window.lesson10
 ].filter(Boolean);
