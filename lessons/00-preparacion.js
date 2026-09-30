@@ -9,21 +9,21 @@ sections:[
 ["Instala","Instala GitHub CLI para Windows y vuelve a abrir Git Bash."],
 ["Comprueba la instalación","Ejecuta gh --version. Si muestra una versión, continúa. Si Git Bash responde command not found, cierra y vuelve a abrir la terminal; si persiste, revisa la instalación/PATH antes de seguir."],
 ["Comprueba la sesión","Ejecuta gh auth status. Si indica que ya estás autenticado en github.com con tu cuenta correcta, NO necesitas volver a ejecutar login."],
-["Si NO estás autenticado","Ejecuta gh auth login y sigue el asistente que aparece en la terminal."]
+["Si NO estás autenticado","Ejecuta gh auth login. NO tienes que adivinar las opciones: justo debajo tienes el recorrido completo, pantalla por pantalla, con lo que debes seleccionar y por qué."]
 ]},
 {type:"code",label:"GIT BASH",title:"Primero comprueba tu estado",code:"gh --version\n\ngh auth status"},
-{type:"steps",title:"Si gh auth status dice que NO estás autenticado",steps:[
+{type:"concept",title:"Antes de empezar · qué va a ocurrir",text:"gh auth login abre un asistente interactivo dentro de Git Bash. No escribas las respuestas de memoria: lee cada pregunta y utiliza esta guía para saber qué seleccionar y qué significa."},\n{type:"steps",title:"Si gh auth status dice que NO estás autenticado",steps:[
 ["Inicia el asistente","Ejecuta gh auth login."],
-["Cuenta","Ante What account do you want to log into? selecciona GitHub.com."],
-["Protocolo Git","Ante preferred protocol for Git operations selecciona HTTPS."],
-["Credenciales Git","Si pregunta Authenticate Git with your GitHub credentials? selecciona Yes."],
-["Método","Selecciona Login with a web browser."],
-["Código temporal","GitHub CLI mostrará un código de un solo uso. Cópialo."],
-["Navegador","Pulsa Enter para abrir el navegador. Si no se abre, utiliza manualmente la dirección que muestre GitHub CLI."],
-["Autoriza","Inicia sesión en GitHub si hace falta, introduce/valida el código y autoriza GitHub CLI."],
-["Vuelve a Git Bash","No des por terminada la autenticación sólo porque el navegador muestre éxito."]
+["Pregunta 1 · Cuenta","Verás: What account do you want to log into? Muévete con ↑/↓ si hace falta, deja seleccionado GitHub.com y pulsa Enter. Elegimos GitHub.com porque nuestros repositorios están alojados allí, no en un GitHub Enterprise Server."],
+["Pregunta 2 · Protocolo Git","Verás: What is your preferred protocol for Git operations? Selecciona HTTPS y pulsa Enter. Así GitHub CLI podrá configurar un flujo sencillo de autenticación para las operaciones Git del aula."],
+["Pregunta 3 · Credenciales Git","Si aparece: Authenticate Git with your GitHub credentials? selecciona Yes y pulsa Enter. Queremos que la autenticación que estamos realizando pueda utilizarse también cuando trabajemos con Git contra GitHub."],
+["Pregunta 4 · Método de autenticación","Verás una pregunta similar a How would you like to authenticate GitHub CLI? Selecciona Login with a web browser. No necesitas crear ni pegar manualmente un token para este procedimiento."],
+["Código temporal","Git Bash mostrará un mensaje parecido a First copy your one-time code: XXXX-XXXX. Copia ese código. Es temporal y sirve para relacionar el navegador con el login que acabas de iniciar en la terminal."],
+["Abre el navegador","Git Bash indicará Press Enter to open ... in your browser. Pulsa Enter. Si el navegador no se abre automáticamente, NO reinicies el proceso: copia la dirección que muestra la terminal y ábrela manualmente."],
+["Autoriza en GitHub","Si GitHub te pide iniciar sesión, utiliza la cuenta con la que trabajarás en clase. Introduce o confirma el código temporal cuando lo solicite y acepta Authorize GitHub / Authorize GitHub CLI."],
+["Vuelve a Git Bash","Cuando el navegador confirme la autorización, vuelve a Git Bash. La terminal debería terminar el proceso y mostrar un mensaje de autenticación correcta. Todavía falta nuestra comprobación final con gh auth status."]
 ]},
-{type:"code",label:"GIT BASH",title:"Autentica sólo si hace falta",code:"gh auth login"},
+{type:"code",label:"GIT BASH · INICIA EL ASISTENTE",title:"Autentica sólo si hace falta",code:"gh auth login"},\n{type:"flow",title:"Mapa rápido del asistente",items:["gh auth login","GitHub.com","HTTPS","Yes · credenciales Git","Login with a web browser","Copia XXXX-XXXX","Autoriza en navegador","Vuelve a Git Bash","gh auth status ✓"]},
 {type:"steps",title:"Verificación y recuperación",steps:[
 ["Verifica","Ejecuta de nuevo gh auth status."],
 ["Si funciona","Debe indicar que estás autenticado en github.com. Comprueba también que el usuario mostrado es tu cuenta correcta y continúa con Node.js."],
