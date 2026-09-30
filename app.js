@@ -49,10 +49,30 @@ function renderTabContent(tab){
   if(tab.note) html+='<div class="inline-note">'+tab.note+'</div>';
   return html;
 }
+function renderWizard(lesson,section,sectionIndex){
+  const key=lesson.id+"-wizard-"+sectionIndex;
+  const current=Math.min(state.wizards?.[key] ?? 0,section.steps.length-1);
+  const step=section.steps[current];
+  const pct=Math.round(((current+1)/section.steps.length)*100);
+  return '<section class="card wizard-card">'+
+    '<div class="wizard-head"><div><span class="label">'+(section.label||"GUÍA INTERACTIVA")+'</span><h3>'+section.title+'</h3></div><strong>'+(current+1)+' / '+section.steps.length+'</strong></div>'+
+    '<div class="wizard-progress"><span style="width:'+pct+'%"></span></div>'+
+    '<div class="wizard-stage">'+
+      '<aside class="wizard-rail">'+section.steps.map((s,i)=>'<button type="button" class="wizard-dot '+(i===current?"active ":"")+(i<current?"done":"")+'" data-wizard-key="'+key+'" data-wizard-index="'+i+'" aria-label="Paso '+(i+1)+'">'+(i<current?"✓":i+1)+'</button>').join("")+'</aside>'+
+      '<div class="wizard-main"><p class="wizard-kicker">PASO '+(current+1)+'</p><h4>'+step.title+'</h4><p>'+step.text+'</p>'+
+        (step.code?'<pre><code>'+escapeHtml(step.code)+'</code></pre>':'')+
+        (step.expected?'<div class="expected-box"><strong>✓ Qué deberías ver</strong><p>'+step.expected+'</p></div>':'')+
+        (step.help?'<details class="help-box"><summary>No me sale · ver diagnóstico</summary><p>'+step.help+'</p></details>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="wizard-actions"><button class="btn secondary" type="button" data-wizard-prev="'+key+'" '+(current===0?"disabled":"")+'>← Paso anterior</button><button class="btn primary" type="button" data-wizard-next="'+key+'" '+(current===section.steps.length-1?"disabled":"")+'>'+(current===section.steps.length-1?"Guía completada ✓":"Ya lo tengo · siguiente →")+'</button></div>'+
+  '</section>';
+}
 function renderSteps(section){
   return '<section class="card"><span class="label">AVANZA POR PASOS</span><h3>'+section.title+'</h3><ol class="steps-list">'+section.steps.map((step,i)=>'<li><span class="step-number">'+(i+1)+'</span><div><strong>'+step[0]+'</strong><p>'+step[1]+'</p></div></li>').join("")+'</ol></section>';
 }
 function renderSection(lesson,section,sectionIndex){
+  if(section.type==="wizard") return renderWizard(lesson,section,sectionIndex);
   if(section.type==="tabs") return renderTabs(lesson,section,sectionIndex);
   if(section.type==="steps") return renderSteps(section);
   if(section.type==="grid") return '<section class="grid">'+section.cards.map(card=>'<article class="card"><span class="label">'+card.label+'</span><h3>'+card.title+'</h3><p>'+card.text+'</p></article>').join("")+'</section>';
@@ -74,6 +94,9 @@ function renderSection(lesson,section,sectionIndex){
   return '<section class="'+(classMap[section.type]||"card")+'"><span class="label">'+(labelMap[section.type]||"APRENDE")+'</span><h3>'+section.title+'</h3><p>'+section.text+'</p></section>';
 }
 function bindInteractive(lesson){
+  els.content.querySelectorAll("[data-wizard-key]").forEach(button=>button.addEventListener("click",()=>{state.wizards||={};state.wizards[button.dataset.wizardKey]=Number(button.dataset.wizardIndex);saveState();render()}));
+  els.content.querySelectorAll("[data-wizard-next]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardNext;state.wizards||={};state.wizards[key]=(state.wizards[key]??0)+1;saveState();render()}));
+  els.content.querySelectorAll("[data-wizard-prev]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardPrev;state.wizards||={};state.wizards[key]=Math.max(0,(state.wizards[key]??0)-1);saveState();render()}));
   els.content.querySelectorAll("[data-tab-key]").forEach(button=>button.addEventListener("click",()=>{state.tabs||={};state.tabs[button.dataset.tabKey]=Number(button.dataset.tabIndex);saveState();render()}));
   els.content.querySelectorAll("[data-check]").forEach(input=>input.addEventListener("change",()=>{state.checks||={};state.checks[lesson.id]||={};state.checks[lesson.id][input.dataset.check]=input.checked;saveState()}));
   els.content.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>{const sectionIndex=Number(button.dataset.quizSection);state.answers||={};state.answers[lesson.id]||={};state.answers[lesson.id][sectionIndex]=Number(button.dataset.answer);saveState();render()}));
