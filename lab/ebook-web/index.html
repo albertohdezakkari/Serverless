@@ -544,69 +544,7 @@
     <script src="js/click-scroll.js"></script>
     <script src="js/custom.js"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('.ebook-download-form');
-  if (!form) return;
 
-  // ¡Asegúrate de que este ENDPOINT sea el correcto de tu API Gateway!
-  const ENDPOINT = 'https://g2jytslnvh.execute-api.us-east-1.amazonaws.com/prod/ebook';
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const name = document.getElementById('ebook-form-name').value.trim();
-    const email = document.getElementById('ebook-email').value.trim();
-    
-    // **VALIDACIÓN EN CLIENTE Y DEBUG (NUEVO)**
-    if (!name || !email) {
-        alert('Por favor, completa los campos obligatorios antes de enviar (validación en cliente).');
-        console.error('ERROR: El nombre o el email están vacíos en la extracción del DOM.');
-        return;
-    }
-
-    const payload = { 
-        name: name, // Usamos las variables locales que ya tienen los valores
-        email: email, 
-        phone: '', 
-        message: '' 
-    };
-    
-    // **PUNTO DE DEPURACIÓN CRÍTICO:** Verifica esto en la consola (F12)
-    console.log('Payload a enviar:', payload);
-
-    try {
-      const response = await fetch(ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const text = await response.text();
-      let result = null;
-      try { result = text ? JSON.parse(text) : null; } catch {}
-
-      // La corrección para el éxito (success: true)
-      if (response.ok && (result?.success === true)) {
-        alert('Solicitud enviada correctamente');
-        form.reset();
-      } else {
-        // Muestra el error exacto (incluyendo el 400 que estás viendo)
-        const msg = (result && (result.error || result.message)) || text || 'Error al enviar la solicitud';
-        console.error('Error de API:', msg, result);
-        alert(msg);
-      }
-    } catch (err) {
-      console.error('Error de red al enviar:', err);
-      alert('Error de red al enviar');
-    }
-  });
-});
-</script>
-
-</body>
-
-</html>
 
 </body>
 
