@@ -2,17 +2,16 @@ window.lesson03={
 id:"lambda",title:"Mi primera función Serverless con AWS Lambda",navTitle:"03 · Primera Lambda",
 hero:{eyebrow:"BLOQUE 03 · PRIMER BACKEND SERVERLESS",title:"Crea tu primera Lambda desde AWS Academy",description:"La primera vez trabajamos desde la consola y sin correr: concepto, runtime, Execution Role, código, Deploy, Test Event y CloudWatch.",chips:["Lambda","Node.js","Execution Role","event","handler","CloudWatch"]},
 sections:[
-{type:"flow",title:"Recorrido del bloque · antes de empezar",items:["A · ENTIENDE · Lambda → Function → Invocation → handler/event","B · CREA · Academy → función → runtime → Execution Role","C · PROGRAMA · index.mjs completo","D · PRUEBA · Deploy → Test Event → respuesta","E · OBSERVA · CloudWatch → AWS CLI → checkpoint"]},
+{type:"flow",title:"Recorrido del bloque · antes de empezar",items:["A · ENTIENDE · Lambda → Function/Invocation → handler/event → Execution Role","B · CREA · Learner Lab → función → Node.js → role","C · PROGRAMA · index.mjs completo → Deploy","D · PRUEBA · Test Event → respuesta","E · OBSERVA · CloudWatch → AWS CLI → checkpoint ✓"]},
 {type:"concept",title:"Objetivo del Bloque 03",text:"Crear tu primer backend serverless y poder explicar qué ejecuta Lambda, qué recibe, con qué permisos trabaja, cómo la invocas y dónde observas lo ocurrido."},
-{type:"concept",title:"Tenemos web, pero necesitamos backend",text:"S3 entrega el Ebook, pero no procesa el formulario. Necesitamos ejecutar código cuando se produzca una invocación."},
-{type:"concept",title:"¿Qué es AWS Lambda?",text:"Lambda ejecuta código en respuesta a invocaciones o eventos sin que administremos directamente el servidor. Se utiliza en APIs, procesamiento de archivos, automatizaciones, eventos y mensajería."},
-{type:"grid",cards:[
-{label:"HOY",title:"Formulario Ebook",text:"Procesaremos una solicitud."},{label:"FUTURO",title:"APIs",text:"Lógica de backends serverless."},
-{label:"FUTURO",title:"Eventos",text:"Reacción a servicios y eventos."},{label:"FUTURO",title:"Automatización",text:"Tareas sin mantener un servidor propio."}
+{type:"concept",title:"Conexión con S3",text:"S3 ALOJA nuestra web. Lambda PROCESARÁ información. Todavía no conectamos formulario ni API Gateway: primero aislamos Lambda para aprenderla sin mezclar problemas."},
+{type:"tabs",label:"A · FUNDAMENTOS",title:"Entiende Lambda antes de crearla",tabs:[
+{title:"① ¿Por qué Lambda?",intro:"Necesitamos ejecutar lógica backend cuando ocurra un evento sin administrar directamente un servidor Node.js.",flow:["Evento","Lambda","Código Node.js","Respuesta"]},
+{title:"② Function / Invocation",intro:"Function es el recurso que creas. Invocation es UNA ejecución concreta de esa Function."},
+{title:"③ handler / event",intro:"handler es el punto de entrada que Lambda ejecuta. event contiene los datos recibidos en esa invocación.",code:"export const handler = async (event) => {\n  // event = datos recibidos\n};"},
+{title:"④ Runtime",intro:"Runtime es el entorno que ejecuta tu código. Trabajaremos con JavaScript/Node.js. AWS documenta actualmente Node.js 24.x para nuevas funciones; si Learner Lab ofrece otra versión Node.js soportada definida para clase, usamos esa."},
+{title:"⑤ Execution Role",intro:"Lambda necesita SU propia identidad para actuar sobre AWS. No es lo mismo que tus credenciales temporales de Academy.",flow:["TÚ → credenciales Learner Lab","LAMBDA → Execution Role","Role → permisos CloudWatch / después DynamoDB y SNS"],note:"En Learner Lab usaremos el role existente que el laboratorio permita; no crearemos privilegios administrativos por nuestra cuenta."}
 ]},
-{type:"concept",title:"CONCEPTO NUEVO · Function e Invocation",text:"Function es el recurso/código. Invocation es cada ejecución concreta de esa función."},
-{type:"concept",title:"CONCEPTO NUEVO · event y handler",text:"Lambda entrega la información de cada invocación al handler mediante event. Más adelante API Gateway generará eventos HTTP; hoy empezamos con un JSON sencillo."},
-{type:"flow",title:"Modelo mental",items:["Evento JSON","Lambda","handler(event)","Node.js","Respuesta"]},
 {type:"steps",title:"1 · Entra en Lambda desde AWS Academy",steps:[["Learning Lab","Comprueba que el laboratorio está iniciado."],["AWS Console","Abre la consola desde el propio Learning Lab."],["Busca Lambda","Entra en Lambda → Functions."],["Crea","Pulsa Create function / Creación de función."]]},
 {type:"steps",title:"2 · Author from scratch",steps:[["Modo","Selecciona Author from scratch / Crear desde cero."],["Nombre","Function name: ebook-contact."],["Runtime","Elige Node.js 24.x si está disponible en tu consola. Node.js 22.x sigue soportado; utiliza el runtime disponible definido para la clase."],["Architecture","Mantén x86_64 para este laboratorio."]]},
 {type:"warning",title:"3 · Permissions / Execution Role · NO pases de largo",text:"Lambda se ejecuta con una identidad. En una cuenta estándar la consola puede crear un role básico, pero nosotros estamos en AWS Academy. Utiliza el role permitido por el Learning Lab cuando corresponda; no intentes crear o ampliar roles administrativos si Academy no lo permite."},
