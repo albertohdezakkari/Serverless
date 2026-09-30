@@ -27,7 +27,7 @@ function render(preserveScroll=false){
   const lesson=lessons[currentIndex];
   els.currentTitle.textContent=lesson.title;
   els.content.innerHTML=renderLesson(lesson);
-  renderNav();updateProgress();updateBottomNav(lesson);bindInteractive(lesson);
+  renderNav();updateProgress();updateBottomNav(lesson);bindInteractive(lesson);enhanceCodeBlocks();
   if(preserveScroll){
     const y=state.viewportY ?? window.scrollY;
     requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:"instant"}));
@@ -40,10 +40,63 @@ function renderLesson(lesson){
   const hero='<section class="hero"><p class="eyebrow">'+lesson.hero.eyebrow+'</p><h2>'+lesson.hero.title+'</h2><p>'+lesson.hero.description+'</p><div class="chips">'+lesson.hero.chips.map(x=>'<span class="chip">'+x+'</span>').join("")+'</div></section>';
   return hero+lesson.sections.map((section,i)=>renderSection(lesson,section,i)).join("");
 }
+function panelActions(key){
+  return '<div class="panel-actions"><button class="panel-action-btn" type="button" data-panel-toggle="'+key+'">⛶ Maximizar</button></div>';
+}
+function enhanceCodeBlocks(){
+  els.content.querySelectorAll('pre').forEach((pre,index)=>{
+    if(pre.parentElement?.classList.contains('code-shell')) return;
+    const shell=document.createElement('div');
+    shell.className='code-shell';
+    const bar=document.createElement('div');
+    bar.className='code-toolbar';
+    const label=document.createElement('span');
+    label.textContent='Código';
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='copy-code-btn';
+    btn.textContent='Copiar código';
+    btn.addEventListener('click',async()=>{
+      const code=pre.querySelector('code')?.innerText ?? pre.innerText;
+      try{
+        await navigator.clipboard.writeText(code);
+        btn.textContent='✓ Copiado';
+        setTimeout(()=>btn.textContent='Copiar código',1400);
+      }catch{
+        const range=document.createRange();
+        range.selectNodeContents(pre);
+        const sel=window.getSelection();
+        sel.removeAllRanges(); sel.addRange(range);
+        btn.textContent='Seleccionado · Ctrl+C';
+      }
+    });
+    bar.append(label,btn);
+    pre.parentNode.insertBefore(shell,pre);
+    shell.append(bar,pre);
+  });
+}
+function togglePanel(key){
+  const panel=document.querySelector('[data-panel-key="'+key+'"]');
+  if(!panel) return;
+  const isFull=panel.classList.contains('panel-maximized');
+  if(!isFull){
+    state.panelScrollY=window.scrollY;
+    panel.classList.add('panel-maximized');
+    document.body.classList.add('panel-open');
+    const btn=panel.querySelector('[data-panel-toggle]');
+    if(btn) btn.textContent='↙ Volver';
+  }else{
+    panel.classList.remove('panel-maximized');
+    document.body.classList.remove('panel-open');
+    const btn=panel.querySelector('[data-panel-toggle]');
+    if(btn) btn.textContent='⛶ Maximizar';
+    requestAnimationFrame(()=>window.scrollTo({top:state.panelScrollY??window.scrollY,behavior:'instant'}));
+  }
+}
 function renderTabs(lesson,section,sectionIndex){
   const tabKey=lesson.id+"-"+sectionIndex;
   const active=state.tabs?.[tabKey] ?? 0;
-  return '<section class="card tabs-card" data-anchor="'+tabKey+'"><span class="label">'+(section.label||"APRENDE POR CAPAS")+'</span><h3>'+section.title+'</h3><div class="tab-list" role="tablist">'+
+  return '<section class="card tabs-card" data-anchor="'+tabKey+'" data-panel-key="'+tabKey+'"><div class="panel-heading"><div><span class="label">'+(section.label||"APRENDE POR CAPAS")+'</span><h3>'+section.title+'</h3></div>'+panelActions(tabKey)+'</div><div class="tab-list" role="tablist">'+
     section.tabs.map((tab,i)=>'<button class="tab-btn '+(i===active?"active":"")+'" type="button" data-tab-key="'+tabKey+'" data-tab-index="'+i+'">'+tab.title+'</button>').join("")+
     '</div><div class="tab-panel">'+section.tabs.map((tab,i)=>'<div class="tab-content '+(i===active?"active":"")+'">'+renderTabContent(tab)+'</div>').join("")+'</div></section>';
 }
@@ -64,8 +117,8 @@ function renderWizard(lesson,section,sectionIndex){
   const current=Math.min(state.wizards?.[key] ?? 0,section.steps.length-1);
   const step=section.steps[current];
   const pct=Math.round(((current+1)/section.steps.length)*100);
-  return '<section class="card wizard-card" data-anchor="'+key+'">'+
-    '<div class="wizard-head"><div><span class="label">'+(section.label||"GUÍA INTERACTIVA")+'</span><h3>'+section.title+'</h3></div><strong>'+(current+1)+' / '+section.steps.length+'</strong></div>'+
+  return '<section class="card wizard-card" data-anchor="'+key+'" data-panel-key="'+key+'">'+
+    '<div class="wizard-head"><div><span class="label">'+(section.label||"GUÍA INTERACTIVA")+'</span><h3>'+section.title+'</h3></div><div class="wizard-head-actions">'+panelActions(key)+'<strong>'+(current+1)+' / '+section.steps.length+'</strong></div></div>'+
     '<div class="wizard-progress"><span style="width:'+pct+'%"></span></div>'+
     '<div class="wizard-tabs" role="tablist">'+section.steps.map((s,i)=>'<button type="button" class="wizard-tab '+(i===current?"active ":"")+(i<current?"done":"")+'" data-wizard-key="'+key+'" data-wizard-index="'+i+'"><span class="wizard-tab-index">'+(i<current?"✓":i+1)+'</span><span class="wizard-tab-label">'+(s.shortTitle||s.title)+'</span></button>').join("")+'</div>'+
     '<div class="wizard-stage">'+
@@ -108,6 +161,7 @@ function renderSection(lesson,section,sectionIndex){
   return '<section class="'+(classMap[section.type]||"card")+'"><span class="label">'+(labelMap[section.type]||"APRENDE")+'</span><h3>'+section.title+'</h3><p>'+section.text+'</p></section>';
 }
 function bindInteractive(lesson){
+  els.content.querySelectorAll("[data-panel-toggle]").forEach(button=>button.addEventListener("click",()=>togglePanel(button.dataset.panelToggle)));
   els.content.querySelectorAll("[data-wizard-key]").forEach(button=>button.addEventListener("click",()=>{state.wizards||={};state.viewportY=window.scrollY;state.wizards[button.dataset.wizardKey]=Number(button.dataset.wizardIndex);saveState();render(true)}));
   els.content.querySelectorAll("[data-wizard-next]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardNext;state.wizards||={};state.viewportY=window.scrollY;state.wizards[key]=(state.wizards[key]??0)+1;saveState();render(true)}));
   els.content.querySelectorAll("[data-wizard-prev]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.wizardPrev;state.wizards||={};state.viewportY=window.scrollY;state.wizards[key]=Math.max(0,(state.wizards[key]??0)-1);saveState();render(true)}));
