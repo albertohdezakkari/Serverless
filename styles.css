@@ -138,3 +138,8 @@ body.panel-open{overflow:hidden}
 .console-area>span{width:25px;height:25px;flex:0 0 25px;border-radius:50%;display:grid;place-items:center;background:#E2E8F0;font-weight:900;font-size:12px}
 .console-area strong{display:block;font-size:13px}.console-area small{display:block;margin-top:4px;color:#64748B;line-height:1.4}
 .console-area.active{border-color:#93C5FD;background:#EFF6FF}.console-area.active>span{background:#2563EB;color:white}
+
+.code-learning{border-left:4px solid #2563EB}.code-intro{color:var(--text-secondary);line-height:1.65}
+.pedagogical-code pre code{display:block}.code-line{display:block;min-height:1.65em;white-space:pre}
+.code-line.code-comment{color:#7DD3FC;font-style:italic}
+.pedagogical-code .code-toolbar span{color:#CBD5E1;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
